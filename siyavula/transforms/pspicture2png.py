@@ -113,6 +113,8 @@ def pspicture2png(iPspictureElement, iReturnEps=False, iPageWidthPx=None, iDpi=1
     global pstricksTex
     
     import os, tempfile
+    from lxml import etree
+
     tempDir = tempfile.mkdtemp()
     latexPath = os.path.join(tempDir, 'figure.tex')
     dviPath = os.path.join(tempDir, 'figure.dvi')
@@ -123,9 +125,8 @@ def pspicture2png(iPspictureElement, iReturnEps=False, iPageWidthPx=None, iDpi=1
     namespaces = {
         'style': 'http://siyavula.com/cnxml/style/0.1',
     }
-    pspictureDom = etree.fromstring('<xml xmlns:style="' + namespaces['style'] + '">' + request.POST['code'] + '</xml>')[0]
-    relativeWidth = pspictureDom.attrib.get('{'+namespaces['style']+'}width')
-    code = pspictureDom.find('code').text
+    relativeWidth = iPspictureElement.attrib.get('{'+namespaces['style']+'}width')
+    code = iPspictureElement.find('code').text
     if code is None:
         raise ValueError, "Code cannot be empty."
     with open(latexPath, 'wt') as fp:
