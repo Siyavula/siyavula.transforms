@@ -10,12 +10,16 @@ pstricksTex = r'''
 \usepackage{pst-poly}        %Jo
 \usepackage{xcolor}
 \usepackage{multicol}
-\usepackage{pst-3dplot}        %Jo
-\usepackage{pst-solides3d}
-%\usepackage{pst-diffraction}
 \usepackage{pst-spectra}
 \usepackage{pst-slpe}
 \usepackage{pst-math}
+%\usepackage{pst-3dplot}        %Jo
+%\usepackage{pst-diffraction}
+%\usepackage{pst-lens}
+%\usepackage{pst-optic}         %Jo
+%\usepackage{pst-solides3d}
+%\usepackage{pst-node}
+__PACKAGES__
 
 %% ************* NB ************
 %% The order in which pstricks packages are loaded
@@ -25,8 +29,6 @@ pstricksTex = r'''
 
 %% ************* Packages ************
 \usepackage{pst-circ}
-\usepackage{pst-lens}
-\usepackage{pst-optic}         %Jo
 \usepackage{pstricks-add}         %Jo
 \usepackage{pst-labo}         %Jo
 \usepackage{subfigure}
@@ -97,7 +99,39 @@ pstricksTex = r'''
 \end{document}
 '''
 
-def pspicture2png(iPspictureElement, iReturnEps=False, iPageWidthPx=None, iDpi=150):
+tikzTex = r'''
+\documentclass[10pt]{report}
+\renewcommand{\familydefault}{\sfdefault}
+
+\usepackage{tikz, ifthen}
+\usetikzlibrary{arrows,shapes,backgrounds,patterns,decorations.pathreplacing,decorations.pathmorphing}
+__PACKAGES__
+
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{changebar}
+\usepackage{xcolor}
+
+%% ************* Packages ************
+\usepackage{amsmath}
+\usepackage{wasysym}
+\usepackage{amsmath, amsthm, amsfonts, amssymb}
+\usepackage{eurosym}
+\sffamily
+
+\pagestyle{empty}
+\begin{document}
+\begin{tikzpicture}__CODE__
+\end{tikzpicture}
+\end{document}
+'''
+
+def execute(args):
+    import subprocess
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p.wait()
+
+def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150, iIncludedFiles={}):
     """
     Inputs:
 
@@ -110,8 +144,6 @@ def pspicture2png(iPspictureElement, iReturnEps=False, iPageWidthPx=None, iDpi=1
 
     One or two paths, the first to the PNG, the second to the EPS.
     """
-    global pstricksTex
-    
     import os, tempfile
     from lxml import etree
 
@@ -125,27 +157,46 @@ def pspicture2png(iPspictureElement, iReturnEps=False, iPageWidthPx=None, iDpi=1
     namespaces = {
         'style': 'http://siyavula.com/cnxml/style/0.1',
     }
-    relativeWidth = iPspictureElement.attrib.get('{'+namespaces['style']+'}width')
-    code = iPspictureElement.find('code').text
+    relativeWidth = iPictureElement.attrib.get('{'+namespaces['style']+'}width')
+    packages = ''
+    for packageNode in iPictureElement.xpath('.//usepackage'):
+        packages += r'\usepackage{' + packageNode.text.strip() + '}\n'
+    code = iPictureElement.find('code').text
     if code is None:
         raise ValueError, "Code cannot be empty."
     with open(latexPath, 'wt') as fp:
-        fp.write(pstricksTex.replace('__CODE__', code.strip()))
-    os.system("latex -output-directory " + tempDir + " " + latexPath)
+        fp.write(iLatex.replace('__PACKAGES__', packages).replace('__CODE__', code.strip()))
+
+    for path, pathFile in iIncludedFiles.iteritems():
+        try:
+            os.makedirs(os.path.join(tempDir, os.path.dirname(path)))
+        except OSError:
+            # Catch exception if path already exists
+            pass
+        with open(os.path.join(tempDir, path), 'wb') as fp:
+            fp.write(pathFile.read())
+
+    execute(["latex", "-halt-on-error", "-output-directory", tempDir, latexPath])
     try:
         open(dviPath,"rb")
     except IOError:
         raise IOError, "LaTeX failed to compile the image."
-    os.system("dvips " + dviPath + " -o " + psPath)
-    os.system("ps2epsi " + psPath + " " + epsPath)
+    execute(["dvips", dviPath, "-o", psPath])
+    execute(["ps2epsi", psPath, epsPath])
 
     if (relativeWidth is not None) and (iPageWidthPx is not None):
         size = int(round(float(relativeWidth)*iPageWidthPx))
-        os.system('convert -geometry %ix -density %i %s %s'%(size, 2*size, epsPath, pngPath))
+        execute(['convert', '-geometry', '%ix'%size, '-density', '%i'%(2*size), epsPath, pngPath])
     else:
-        os.system('convert -density %i %s %s'%(iDpi, epsPath, pngPath))
+        execute(['convert', '-density', '%i'%iDpi, epsPath, pngPath])
 
     if iReturnEps:
         return pngPath, epsPath
     else:
         return pngPath
+
+def tikzpicture2png(iTikzpictureElement, *args, **kwargs):
+    return pstikz2png(iTikzpictureElement, tikzTex, *args, **kwargs)
+
+def pspicture2png(iPspictureElement, *args, **kwargs):
+    return pstikz2png(iPspictureElement, pstricksTex, *args, **kwargs)
