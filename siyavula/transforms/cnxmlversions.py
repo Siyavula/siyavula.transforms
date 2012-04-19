@@ -107,7 +107,7 @@ def convert_to_latest(iXml):
         eval('v' + conversionChain[i].replace('.','_') + '_to_v' + conversionChain[i+1].replace('.','_'))(dom)
 
     if isinstance(iXml, basestring):
-        return etree.tostring(dom, xml_declaration=True)
+        return etree.tostring(dom, xml_declaration=True, encoding='utf-8')
     else:
         return dom
 
