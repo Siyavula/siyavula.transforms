@@ -53,8 +53,8 @@ def v0_0_to_v0_1(iDom):
         remainder = len(oldShortcodesNode) - problemNumber + 1
         if remainder > 0:
             one = (remainder == 1)
-            message = "There %s still %i shortcode%s left after having processed %i problem%s." % \
-                (['are', 'is'][one], remainder, ['s', ''][one], problemNumber-1, ['s', ''][(problemNumber-1) == 1])
+            message = "There %s still %i shortcode%s left after having processed %i problem%s. [Title: %s]" % \
+                (['are', 'is'][one], remainder, ['s', ''][one], problemNumber-1, ['s', ''][(problemNumber-1) == 1], repr(etree.tostring(titleNode).strip()))
             raise ValueError, message
 
         # replace old exercise node with new exercises node
