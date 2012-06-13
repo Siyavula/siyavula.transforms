@@ -129,7 +129,11 @@ __PACKAGES__
 def execute(args):
     import subprocess
     p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    p.wait()
+    stdout, stderr = p.communicate()
+    return stdout, stderr
+
+class LatexPictureError(Exception):
+    pass
 
 def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150, iIncludedFiles={}):
     """
@@ -176,11 +180,12 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         with open(os.path.join(tempDir, path), 'wb') as fp:
             fp.write(pathFile.read())
 
-    execute(["latex", "-halt-on-error", "-output-directory", tempDir, latexPath])
+    errorLog, temp = execute(["latex", "-halt-on-error", "-output-directory", tempDir, latexPath])
     try:
         open(dviPath,"rb")
     except IOError:
-        raise IOError, "LaTeX failed to compile the image."
+        print errorLog
+        raise LatexPictureError, "LaTeX failed to compile the image."
     execute(["dvips", dviPath, "-o", psPath])
     execute(["ps2epsi", psPath, epsPath])
 

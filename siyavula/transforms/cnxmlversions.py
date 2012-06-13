@@ -31,6 +31,8 @@ def v0_0_to_v0_1(iDom):
             entryNode.text = '\n'
             entryNode.tail = '\n'
             newExercisesNode.append(entryNode)
+            assert oldShortcodesIndex < len(oldShortcodesNode), "Ran out of shortcodes in " + etree.tostring(titleNode)
+            assert oldShortcodesNode[oldShortcodesIndex].find('number') is not None, "Shortcode element has no <number>. (%s)"%(repr(etree.tostring(oldShortcodesNode[oldShortcodesIndex])))
             assert oldShortcodesNode[oldShortcodesIndex].find('number').text == str(problemNumber), "Non-consecutive integer numbering (expected %i, got %s)"%(problemNumber, oldShortcodesNode[oldShortcodesIndex].find('number').text)
             entryNode.append(oldShortcodesNode[oldShortcodesIndex].find('shortcode'))
             entryNode[-1].tail = '\n'
