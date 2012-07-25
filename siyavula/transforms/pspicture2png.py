@@ -104,7 +104,7 @@ tikzTex = r'''
 \renewcommand{\familydefault}{\sfdefault}
 
 \usepackage{tikz, ifthen}
-\usetikzlibrary{arrows,shapes,backgrounds,patterns,decorations.pathreplacing,decorations.pathmorphing}
+\usetikzlibrary{arrows,shapes,backgrounds,patterns,decorations.pathreplacing,decorations.pathmorphing,decorations.markings}
 __PACKAGES__
 
 \usepackage{setspace}
