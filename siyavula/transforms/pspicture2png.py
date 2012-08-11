@@ -83,7 +83,7 @@ __PACKAGES__
 \newcommand{\etc}{{\em etc.~}}
 \newcommand{\nb}{{\em n.b.~}}
 \newcommand{\eJSI}{{\,\text{kg} \cdot \text{m}^{2} \cdot \text{s}^{-2}}}
-\def\deg{$^\circ$}
+\def\deg{$^{\circ}$}
 \newcommand{\ud}{\mathrm{d}}
 
 % Arrow for objects and images
