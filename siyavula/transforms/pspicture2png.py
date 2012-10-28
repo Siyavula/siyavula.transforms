@@ -140,9 +140,15 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     Inputs:
 
       iPspictureElement - etree.Element
+
       iReturnEps - whether to also return the intermediate EPS file
-      iPageWidthPx - 
-      iDpi - 
+
+      iPageWidthPx - page width in pixels, used to scale the
+        style:width attribute in the element.
+
+      iDpi - Will be used only if the width of the figure relative to
+        the page width was not set (or the page width in pixels was not
+        passed as an argument).
 
     Outputs:
 
