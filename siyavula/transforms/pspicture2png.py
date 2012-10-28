@@ -3,22 +3,26 @@ pstricksTex = r'''
 \renewcommand{\familydefault}{\sfdefault}
 \usepackage{float} % for figures to appear where you want them
 \usepackage{setspace}
+\usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{changebar}
+
 \usepackage{pst-all}
-\usepackage{pst-eucl}        %Jo
-\usepackage{pst-poly}        %Jo
-\usepackage{xcolor}
-\usepackage{multicol}
-\usepackage{pst-spectra}
-\usepackage{pst-slpe}
+\usepackage{pst-eucl}
+\usepackage{pst-poly}
 \usepackage{pst-math}
-%\usepackage{pst-3dplot}        %Jo
+\usepackage{pstricks-add}
+
+%\usepackage{pst-spectra}
+%\usepackage{pst-slpe}
+%\usepackage{pst-3dplot}
 %\usepackage{pst-diffraction}
 %\usepackage{pst-lens}
-%\usepackage{pst-optic}         %Jo
+%\usepackage{pst-optic}
 %\usepackage{pst-solides3d}
 %\usepackage{pst-node}
+%\usepackage{pst-labo}
+
 __PACKAGES__
 
 %% ************* NB ************
@@ -104,7 +108,7 @@ tikzTex = r'''
 \renewcommand{\familydefault}{\sfdefault}
 
 \usepackage{tikz, ifthen}
-\usetikzlibrary{arrows,shapes,backgrounds,patterns,decorations.pathreplacing,decorations.pathmorphing,decorations.markings}
+\usetikzlibrary{arrows,shapes,backgrounds,patterns,decorations.pathreplacing,decorations.pathmorphing,decorations.markings,shadows,shapes.misc,calc,positioning,intersections}
 __PACKAGES__
 
 \usepackage{setspace}
