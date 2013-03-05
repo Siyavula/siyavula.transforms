@@ -139,7 +139,7 @@ def execute(args):
 class LatexPictureError(Exception):
     pass
 
-def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150, iIncludedFiles={}):
+def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150, iIncludedFiles={}, iLatexCommand='latex'):
     """
     Inputs:
 
@@ -190,7 +190,7 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         with open(os.path.join(tempDir, path), 'wb') as fp:
             fp.write(pathFile.read())
 
-    errorLog, temp = execute(["latex", "-halt-on-error", "-output-directory", tempDir, latexPath])
+    errorLog, temp = execute([iLatexCommand, "-halt-on-error", "-output-directory", tempDir, latexPath])
     try:
         open(dviPath,"rb")
     except IOError:
