@@ -139,7 +139,7 @@ def execute(args):
 class LatexPictureError(Exception):
     pass
 
-def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150, iIncludedFiles={}, iLatexCommand='latex'):
+def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150, iIncludedFiles={}, iLatexPath=''):
     """
     Inputs:
 
@@ -165,7 +165,7 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     latexPath = os.path.join(tempDir, 'figure.tex')
     dviPath = os.path.join(tempDir, 'figure.dvi')
     psPath = os.path.join(tempDir, 'figure.ps')
-    epsPath = os.path.join(tempDir, 'figure.epsi')
+    epsPath = os.path.join(tempDir, 'figure.eps')
     pngPath = os.path.join(tempDir, 'figure.png')
 
     namespaces = {
@@ -190,14 +190,14 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         with open(os.path.join(tempDir, path), 'wb') as fp:
             fp.write(pathFile.read())
 
-    errorLog, temp = execute([iLatexCommand, "-halt-on-error", "-output-directory", tempDir, latexPath])
+    errorLog, temp = execute([os.path.join(iLatexPath, 'latex'), "-halt-on-error", "-output-directory", tempDir, latexPath])
     try:
         open(dviPath,"rb")
     except IOError:
         print errorLog
         raise LatexPictureError, "LaTeX failed to compile the image."
-    execute(["dvips", dviPath, "-o", psPath])
-    execute(["ps2epsi", psPath, epsPath])
+    execute([os.path.join(iLatexPath, "dvips"), dviPath, "-o", psPath])
+    execute([os.path.join(iLatexPath, "ps2eps"), psPath, epsPath])
 
     if (relativeWidth is not None) and (iPageWidthPx is not None):
         size = int(round(float(relativeWidth)*iPageWidthPx))
