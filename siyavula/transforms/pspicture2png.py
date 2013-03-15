@@ -137,7 +137,9 @@ def execute(args):
     return stdout, stderr
 
 class LatexPictureError(Exception):
-    pass
+    def __init__(self, message, errorLog):
+        Exception.__init__(self, message)
+        self.errorLog = errorLog
 
 def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150, iIncludedFiles={}, iLatexPath=''):
     """
@@ -194,8 +196,7 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     try:
         open(dviPath,"rb")
     except IOError:
-        print errorLog
-        raise LatexPictureError, "LaTeX failed to compile the image."
+        raise LatexPictureError("LaTeX failed to compile the image.", errorLog)
     execute([os.path.join(iLatexPath, "dvips"), dviPath, "-o", psPath])
     execute([os.path.join(iLatexPath, "ps2eps"), psPath, epsPath])
 
