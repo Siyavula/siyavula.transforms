@@ -1,3 +1,5 @@
+from base import *
+
 pstricksTex = r'''
 \documentclass[10pt]{report}
 \renewcommand{\familydefault}{\sfdefault}
@@ -130,22 +132,14 @@ __PACKAGES__
 \end{document}
 '''
 
-def execute(args):
-    import subprocess
-    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    return stdout, stderr
-
-class LatexPictureError(Exception):
-    def __init__(self, message, errorLog):
-        Exception.__init__(self, message)
-        self.errorLog = errorLog
-
-def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150, iIncludedFiles={}, iLatexPath=''):
+def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150, iIncludedFiles={}, iPasses=1, iLatexPath=''):
     """
     Inputs:
 
-      iPspictureElement - etree.Element
+      iPictureElement - etree.Element
+
+      iLatex - The LaTeX source template into which to paste the
+        picture code.
 
       iReturnEps - whether to also return the intermediate EPS file
 
@@ -155,6 +149,15 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
       iDpi - Will be used only if the width of the figure relative to
         the page width was not set (or the page width in pixels was not
         passed as an argument).
+
+      iIncludedFiles - Dictionary mapping paths to binary data. These
+        files may be linked to from the LaTeX source. Paths may
+        contain sub-directories.
+
+      iPasses - The number of times to run latex.
+
+      iLatexPath - Path to location of LaTeX executables. This should
+        contain latex.
 
     Outputs:
 
@@ -192,13 +195,14 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         with open(os.path.join(tempDir, path), 'wb') as fp:
             fp.write(pathFile.read())
 
-    errorLog, temp = execute([os.path.join(iLatexPath, 'latex'), "-halt-on-error", "-output-directory", tempDir, latexPath])
-    try:
-        open(dviPath,"rb")
-    except IOError:
-        raise LatexPictureError("LaTeX failed to compile the image.", errorLog)
+    for i in range(iPasses):
+        errorLog, temp = execute([os.path.join(iLatexPath, 'latex'), "-halt-on-error", "-output-directory", tempDir, latexPath])
+        try:
+            open(dviPath, "rb").close()
+        except IOError:
+            raise LatexPictureError("LaTeX failed to compile the image on pass %i"%i, errorLog)
     execute([os.path.join(iLatexPath, "dvips"), dviPath, "-o", psPath])
-    execute([os.path.join(iLatexPath, "ps2eps"), psPath, epsPath])
+    execute([os.path.join(iLatexPath, "ps2eps"), psPath])
 
     if (relativeWidth is not None) and (iPageWidthPx is not None):
         size = int(round(float(relativeWidth)*iPageWidthPx))
@@ -212,7 +216,61 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         return pngPath
 
 def tikzpicture2png(iTikzpictureElement, *args, **kwargs):
+    """
+    Inputs:
+
+      iTikzpictureElement - etree.Element
+
+      iReturnEps - whether to also return the intermediate EPS file
+
+      iPageWidthPx - page width in pixels, used to scale the
+        style:width attribute in the element.
+
+      iDpi - Will be used only if the width of the figure relative to
+        the page width was not set (or the page width in pixels was not
+        passed as an argument).
+
+      iIncludedFiles - Dictionary mapping paths to binary data. These
+        files may be linked to from the LaTeX source. Paths may
+        contain sub-directories.
+
+      iPasses - The number of times to run latex.
+
+      iLatexPath - Path to location of LaTeX executables. This should
+        contain latex.
+
+    Outputs:
+
+    One or two paths, the first to the PNG, the second to the EPS.
+    """
     return pstikz2png(iTikzpictureElement, tikzTex, *args, **kwargs)
 
 def pspicture2png(iPspictureElement, *args, **kwargs):
+    """
+    Inputs:
+
+      iPspictureElement - etree.Element
+
+      iReturnEps - whether to also return the intermediate EPS file
+
+      iPageWidthPx - page width in pixels, used to scale the
+        style:width attribute in the element.
+
+      iDpi - Will be used only if the width of the figure relative to
+        the page width was not set (or the page width in pixels was not
+        passed as an argument).
+
+      iIncludedFiles - Dictionary mapping paths to binary data. These
+        files may be linked to from the LaTeX source. Paths may
+        contain sub-directories.
+
+      iPasses - The number of times to run latex.
+
+      iLatexPath - Path to location of LaTeX executables. This should
+        contain latex.
+
+    Outputs:
+
+    One or two paths, the first to the PNG, the second to the EPS.
+    """
     return pstikz2png(iPspictureElement, pstricksTex, *args, **kwargs)
