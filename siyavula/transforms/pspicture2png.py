@@ -167,7 +167,8 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     from lxml import etree
 
     tempDir = tempfile.mkdtemp()
-    latexPath = os.path.join(tempDir, 'figure.tex')
+    latexFilename = 'figure.tex'
+    latexPath = os.path.join(tempDir, latexFilename)
     dviPath = os.path.join(tempDir, 'figure.dvi')
     psPath = os.path.join(tempDir, 'figure.ps')
     epsPath = os.path.join(tempDir, 'figure.eps')
@@ -196,7 +197,7 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
             fp.write(pathFile.read())
 
     for i in range(iPasses):
-        errorLog, temp = execute([os.path.join(iLatexPath, 'latex'), "-halt-on-error", "-output-directory", tempDir, latexPath])
+        errorLog, temp = execute([os.path.join(iLatexPath, 'latex'), "-halt-on-error", latexFilename], cwd=tempDir)
         try:
             open(dviPath, "rb").close()
         except IOError:

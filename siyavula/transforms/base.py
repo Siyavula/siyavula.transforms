@@ -3,8 +3,8 @@ class LatexPictureError(Exception):
         Exception.__init__(self, message)
         self.errorLog = errorLog
 
-def execute(args):
+def execute(args, cwd=None):
     import subprocess
-    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
     return stdout, stderr

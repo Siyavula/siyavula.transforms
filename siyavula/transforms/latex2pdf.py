@@ -21,8 +21,10 @@ def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath=''):
     """
     import os, tempfile
     tempDir = tempfile.mkdtemp()
-    latexPath = os.path.join(tempDir, 'document.tex')
-    pdfPath = os.path.join(tempDir, 'document.pdf')
+    latexFilename = 'document.tex'
+    pdfFilename = 'document.pdf'
+    latexPath = os.path.join(tempDir, latexFilename)
+    pdfPath = os.path.join(tempDir, pdfFilename)
     with open(latexPath, 'wt') as fp:
         fp.write(iLatex)
     for path, pathFile in iIncludedFiles.iteritems():
@@ -34,7 +36,7 @@ def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath=''):
         with open(os.path.join(tempDir, path), 'wb') as fp:
             fp.write(pathFile.read())
     for i in range(iPasses):
-        errorLog, temp = execute([os.path.join(iLatexPath, 'pdflatex'), "-halt-on-error", "-output-directory", tempDir, latexPath])
+        errorLog, temp = execute([os.path.join(iLatexPath, 'pdflatex'), "-halt-on-error", latexFilename], cwd=tempDir)
         try:
             open(pdfPath, "rb").close()
         except IOError:
