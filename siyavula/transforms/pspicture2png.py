@@ -167,12 +167,17 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     from lxml import etree
 
     tempDir = tempfile.mkdtemp()
-    latexFilename = 'figure.tex'
+    baseFilename = '_oOFIGUREOo_'
+    latexFilename = baseFilename + '.tex'
+    dviFilename = baseFilename + '.dvi'
+    psFilename = baseFilename + '.ps'
+    epsFilename = baseFilename + '.eps'
+    pngFilename = baseFilename + '.png'
     latexPath = os.path.join(tempDir, latexFilename)
-    dviPath = os.path.join(tempDir, 'figure.dvi')
-    psPath = os.path.join(tempDir, 'figure.ps')
-    epsPath = os.path.join(tempDir, 'figure.eps')
-    pngPath = os.path.join(tempDir, 'figure.png')
+    dviPath = os.path.join(tempDir, dviFilename)
+    psPath = os.path.join(tempDir, psFilename)
+    epsPath = os.path.join(tempDir, epsFilename)
+    pngPath = os.path.join(tempDir, pngFilename)
 
     namespaces = {
         'style': 'http://siyavula.com/cnxml/style/0.1',
@@ -202,14 +207,14 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
             open(dviPath, "rb").close()
         except IOError:
             raise LatexPictureError("LaTeX failed to compile the image on pass %i"%i, errorLog)
-    execute([os.path.join(iLatexPath, "dvips"), dviPath, "-o", psPath])
-    execute([os.path.join(iLatexPath, "ps2eps"), psPath])
+    execute([os.path.join(iLatexPath, "dvips"), dviFilename, "-o", psFilename], cwd=tempDir)
+    execute([os.path.join(iLatexPath, "ps2eps"), psFilename], cwd=tempDir)
 
     if (relativeWidth is not None) and (iPageWidthPx is not None):
         size = int(round(float(relativeWidth)*iPageWidthPx))
-        execute(['convert', '-geometry', '%ix'%size, '-density', '%i'%(2*size), epsPath, pngPath])
+        execute(['convert', '-geometry', '%ix'%size, '-density', '%i'%(2*size), epsFilename, pngFilename], cwd=tempDir)
     else:
-        execute(['convert', '-density', '%i'%iDpi, epsPath, pngPath])
+        execute(['convert', '-density', '%i'%iDpi, epsFilename, pngFilename], cwd=tempDir)
 
     if iReturnEps:
         return pngPath, epsPath
