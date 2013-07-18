@@ -26,7 +26,7 @@ def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath=''):
     latexPath = os.path.join(tempDir, latexFilename)
     pdfPath = os.path.join(tempDir, pdfFilename)
     with open(latexPath, 'wt') as fp:
-        fp.write(iLatex)
+        fp.write(iLatex.encode('utf-8'))
     for path, pathFile in iIncludedFiles.iteritems():
         try:
             os.makedirs(os.path.join(tempDir, os.path.dirname(path)))
