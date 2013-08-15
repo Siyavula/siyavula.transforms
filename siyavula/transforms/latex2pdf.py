@@ -1,6 +1,6 @@
 from base import *
 
-def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath=''):
+def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath='', iLatexCommand=None):
     """
     Inputs:
 
@@ -14,6 +14,9 @@ def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath=''):
 
       iLatexPath - Path to location of LaTeX executables. This should
         contain pdflatex.
+
+      iLatexCommand - The executable to use for compiling the LaTeX
+        code. If specified, this overrides iLatexPath.
 
     Outputs:
 
@@ -35,8 +38,12 @@ def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath=''):
             pass
         with open(os.path.join(tempDir, path), 'wb') as fp:
             fp.write(pathFile.read())
+    if iLatexCommand is not None:
+        latexCommand = iLatexCommand
+    else:
+        latexCommand = os.path.join(iLatexPath, 'pdflatex')
     for i in range(iPasses):
-        errorLog, temp = execute([os.path.join(iLatexPath, 'pdflatex'), "-halt-on-error", latexFilename], cwd=tempDir)
+        errorLog, temp = execute([latexCommand, "-halt-on-error", latexFilename], cwd=tempDir)
         try:
             open(pdfPath, "rb").close()
         except IOError:
