@@ -6,9 +6,11 @@ def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath='', iLatexCommand
 
       iLatex - The LaTeX code to compile.
 
-      iIncludedFiles - Dictionary mapping paths to binary data. These
-        files may be linked to from the LaTeX source. Paths may
-        contain sub-directories.
+      iIncludedFiles - Dictionary mapping paths to binary data or
+        streams. These files may be linked to from the LaTeX
+        source. Paths may contain sub-directories. Each key is of type
+        string and each value is either of type string or a class that
+        supports a read() method.
 
       iPasses - The number of times to run pdflatex.
 
@@ -36,8 +38,9 @@ def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath='', iLatexCommand
         except OSError:
             # Catch exception if path already exists
             pass
+        contents = pathFile if isinstance(pathFile, basestring) else pathFile.read()
         with open(os.path.join(tempDir, path), 'wb') as fp:
-            fp.write(pathFile.read())
+            fp.write(contents)
     if iLatexCommand is not None:
         latexCommand = iLatexCommand
     else:

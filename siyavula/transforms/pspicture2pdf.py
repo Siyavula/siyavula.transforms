@@ -154,6 +154,12 @@ def pstikz2pdf(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         the page width was not set (or the page width in pixels was not
         passed as an argument).
 
+      iIncludedFiles - Dictionary mapping paths to binary data or
+        streams. These files may be linked to from the LaTeX
+        source. Paths may contain sub-directories. Each key is of type
+        string and each value is either of type string or a class that
+        supports a read() method.
+
     Outputs:
 
     One or two paths, the first to the PNG, the second to the EPS.
@@ -187,8 +193,9 @@ def pstikz2pdf(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         except OSError:
             # Catch exception if path already exists
             pass
+        contents = pathFile if isinstance(pathFile, basestring) else pathFile.read()
         with open(os.path.join(tempDir, path), 'wb') as fp:
-            fp.write(pathFile.read())
+            fp.write(contents)
 
     errorLog, temp = execute(["latex", "-halt-on-error", "-output-directory", tempDir, latexPath])
     try:
