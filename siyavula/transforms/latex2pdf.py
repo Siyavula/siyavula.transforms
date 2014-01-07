@@ -1,6 +1,6 @@
 from base import *
 
-def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath='', iLatexCommand=None):
+def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath='', iLatexBinary='pdflatex', iLatexCommand=None):
     """
     Inputs:
 
@@ -14,11 +14,15 @@ def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath='', iLatexCommand
 
       iPasses - The number of times to run pdflatex.
 
-      iLatexPath - Path to location of LaTeX executables. This should
-        contain pdflatex.
+      iLatexPath - The directory containing LaTeX executables. This should
+        contain pdflatex (or iLatexBinary, if specified).
 
-      iLatexCommand - The executable to use for compiling the LaTeX
-        code. If specified, this overrides iLatexPath.
+      iLatexBinary - The name of the binary to call for running LaTeX.
+        Note that this is not a full path, but only the name of the binary.
+
+      iLatexCommand - The full path to the binary to use for compiling
+        the LaTeX code. If specified, this overrides both iLatexPath
+        and iLatexBinary.
 
     Outputs:
 
@@ -44,7 +48,7 @@ def latex2pdf(iLatex, iIncludedFiles={}, iPasses=1, iLatexPath='', iLatexCommand
     if iLatexCommand is not None:
         latexCommand = iLatexCommand
     else:
-        latexCommand = os.path.join(iLatexPath, 'pdflatex')
+        latexCommand = os.path.join(iLatexPath, iLatexBinary)
     for i in range(iPasses):
         errorLog, temp = execute([latexCommand, "-halt-on-error", latexFilename], cwd=tempDir)
         try:
