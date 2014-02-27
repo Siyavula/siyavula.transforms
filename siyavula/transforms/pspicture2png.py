@@ -205,7 +205,14 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
             fp.write(contents)
 
     for i in range(iPasses):
-        errorLog, temp = execute([os.path.join(iLatexPath, 'latex'), "-halt-on-error", latexFilename], cwd=tempDir)
+        command = [os.path.join(iLatexPath, 'latex'), "-halt-on-error", latexFilename]
+        try:
+            errorLog, temp = execute(command, cwd=tempDir)
+        except OSError, error:
+            extra = " when calling execute(%s, cwd=%s)"%(repr(command), repr(tempDir))
+            error.args = (error.args[0] + extra,) + error.args[1:]
+            error.message += extra
+            raise error
         try:
             open(dviPath, "rb").close()
         except IOError:
