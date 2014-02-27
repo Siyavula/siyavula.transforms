@@ -209,10 +209,7 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         try:
             errorLog, temp = execute(command, cwd=tempDir)
         except OSError, error:
-            extra = " when calling execute(%s, cwd=%s)"%(repr(command), repr(tempDir))
-            error.args = (error.args[0] + extra,) + error.args[1:]
-            error.message += extra
-            raise error
+            raise Exception, "Got %s when calling execute(%s, cwd=%s)"%(repr(error), repr(command), repr(tempDir))
         try:
             open(dviPath, "rb").close()
         except IOError:
