@@ -215,13 +215,14 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         except IOError:
             raise LatexPictureError("LaTeX failed to compile the image on pass %i"%i, errorLog)
     execute([os.path.join(iLatexPath, "dvips"), dviFilename, "-o", psFilename], cwd=tempDir)
-    execute([os.path.join(iLatexPath, "ps2eps"), psFilename], cwd=tempDir)
+    if iReturnEps:
+        execute([os.path.join(iLatexPath, "ps2eps"), psFilename], cwd=tempDir)
 
     if (relativeWidth is not None) and (iPageWidthPx is not None):
         size = int(round(float(relativeWidth)*iPageWidthPx))
-        execute(['convert', '-geometry', '%ix'%size, '-density', '%i'%(2*size), epsFilename, pngFilename], cwd=tempDir)
+        execute(['convert', '-trim', '-geometry', '%ix'%size, '-density', '%i'%(2*size), psFilename, pngFilename], cwd=tempDir)
     else:
-        execute(['convert', '-density', '%i'%iDpi, epsFilename, pngFilename], cwd=tempDir)
+        execute(['convert', '-trim', '-density', '%i'%iDpi, psFilename, pngFilename], cwd=tempDir)
 
     if iReturnEps:
         return pngPath, epsPath
