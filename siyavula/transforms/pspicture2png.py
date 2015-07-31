@@ -167,6 +167,7 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     """
     import os, tempfile
     from lxml import etree
+    iLatexPath = iLatexPath or os.environ.get('LATEX_PATH', '')
 
     tempDir = tempfile.mkdtemp()
     baseFilename = '_oOFIGUREOo_'
