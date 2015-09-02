@@ -1,3 +1,6 @@
+import os
+import tempfile
+from lxml import etree
 from base import *
 
 pstricksTex = r'''
@@ -132,7 +135,9 @@ __PACKAGES__
 \end{document}
 '''
 
-def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150, iIncludedFiles={}, iPasses=1, iLatexPath=''):
+
+def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150,
+               iIncludedFiles={}, iPasses=1, iLatexPath=''):
     """
     Inputs:
 
@@ -165,8 +170,7 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
 
     One or two paths, the first to the PNG, the second to the EPS.
     """
-    import os, tempfile
-    from lxml import etree
+    iLatexPath = iLatexPath or os.environ.get('LATEX_PATH', '')
 
     tempDir = tempfile.mkdtemp()
     baseFilename = '_oOFIGUREOo_'
@@ -184,13 +188,13 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     namespaces = {
         'style': 'http://siyavula.com/cnxml/style/0.1',
     }
-    relativeWidth = iPictureElement.attrib.get('{'+namespaces['style']+'}width')
+    relativeWidth = iPictureElement.attrib.get('{' + namespaces['style'] + '}width')
     packages = ''
     for packageNode in iPictureElement.xpath('.//usepackage'):
         packages += r'\usepackage{' + packageNode.text.strip() + '}\n'
     code = iPictureElement.find('code').text
     if code is None:
-        raise ValueError, "Code cannot be empty."
+        raise ValueError("Code cannot be empty")
     with open(latexPath, 'wt') as fp:
         fp.write(iLatex.replace('__PACKAGES__', packages).replace('__CODE__', code.strip()))
 
@@ -209,25 +213,30 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         try:
             errorLog, temp = execute(command, cwd=tempDir)
         except OSError, error:
-            raise Exception, "Got %s when calling execute(%s, cwd=%s)"%(repr(error), repr(command), repr(tempDir))
+            raise Exception("Got {} when calling execute({}, cwd={})".format(
+                            error, command, tempDir))
         try:
             open(dviPath, "rb").close()
         except IOError:
-            raise LatexPictureError("LaTeX failed to compile the image on pass %i"%i, errorLog)
+            raise LatexPictureError("LaTeX failed to compile the image on pass %i" % i, errorLog)
     execute([os.path.join(iLatexPath, "dvips"), dviFilename, "-o", psFilename], cwd=tempDir)
+
     if iReturnEps:
         execute([os.path.join(iLatexPath, "ps2eps"), psFilename], cwd=tempDir)
 
     if (relativeWidth is not None) and (iPageWidthPx is not None):
-        size = int(round(float(relativeWidth)*iPageWidthPx))
-        execute(['convert', '-trim', '-geometry', '%ix'%size, '-density', '%i'%(2*size), psFilename, pngFilename], cwd=tempDir)
+        size = int(round(float(relativeWidth) * iPageWidthPx))
+        execute(
+            ['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
+                psFilename, pngFilename], cwd=tempDir)
     else:
-        execute(['convert', '-trim', '-density', '%i'%iDpi, psFilename, pngFilename], cwd=tempDir)
+        execute(['convert', '-trim', '-density', '%i' % iDpi, psFilename, pngFilename], cwd=tempDir)
 
     if iReturnEps:
         return pngPath, epsPath
     else:
         return pngPath
+
 
 def tikzpicture2png(iTikzpictureElement, *args, **kwargs):
     """
@@ -258,6 +267,7 @@ def tikzpicture2png(iTikzpictureElement, *args, **kwargs):
     One or two paths, the first to the PNG, the second to the EPS.
     """
     return pstikz2png(iTikzpictureElement, tikzTex, *args, **kwargs)
+
 
 def pspicture2png(iPspictureElement, *args, **kwargs):
     """
