@@ -135,6 +135,32 @@ __PACKAGES__
 \end{document}
 '''
 
+customPackageTex = r'''
+\documentclass[10pt]{report}
+\renewcommand{\familydefault}{\sfdefault}
+
+\usepackage{tikz, ifthen}
+\usetikzlibrary{arrows,shapes,backgrounds,patterns,decorations.pathreplacing,decorations.pathmorphing,decorations.markings,shadows,shapes.misc,calc,positioning,intersections}
+__PACKAGES__
+
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{changebar}
+\usepackage{xcolor}
+
+%% ************* Packages ************
+\usepackage{amsmath}
+\usepackage{wasysym}
+\usepackage{amsmath, amsthm, amsfonts, amssymb}
+\usepackage{eurosym}
+\sffamily
+
+\pagestyle{empty}
+\begin{document}
+__CODE__
+\end{document}
+'''
+
 
 def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150,
                iIncludedFiles={}, iPasses=1, iLatexPath=''):
@@ -173,8 +199,10 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     iLatexPath = iLatexPath or os.environ.get('LATEX_PATH', '')
 
     tempDir = tempfile.mkdtemp()
+    print(tempDir)
     baseFilename = '_oOFIGUREOo_'
     latexFilename = baseFilename + '.tex'
+    print(latexFilename)
     dviFilename = baseFilename + '.dvi'
     psFilename = baseFilename + '.ps'
     epsFilename = baseFilename + '.eps'
@@ -235,7 +263,7 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     if iReturnEps:
         return pngPath, epsPath
     else:
-        return pngPath
+        return pngPath       
 
 
 def tikzpicture2png(iTikzpictureElement, *args, **kwargs):
@@ -298,3 +326,36 @@ def pspicture2png(iPspictureElement, *args, **kwargs):
     One or two paths, the first to the PNG, the second to the EPS.
     """
     return pstikz2png(iPspictureElement, pstricksTex, *args, **kwargs)
+
+
+def custompackage2png(iCustomPackageElement, *args, **kwargs):
+    """
+    Inputs:
+
+      iCustomPackageElement - etree.Element
+
+      iReturnEps - whether to also return the intermediate EPS file
+
+      iPageWidthPx - page width in pixels, used to scale the
+        style:width attribute in the element.
+
+      iDpi - Will be used only if the width of the figure relative to
+        the page width was not set (or the page width in pixels was not
+        passed as an argument).
+
+      iIncludedFiles - Dictionary mapping paths to binary data. These
+        files may be linked to from the LaTeX source. Paths may
+        contain sub-directories.
+
+      iPasses - The number of times to run latex.
+
+      iLatexPath - Path to location of LaTeX executables. This should
+        contain latex.
+
+    Outputs:
+
+    One or two paths, the first to the PNG, the second to the EPS.
+    """
+    return pstikz2png(iCustomPackageElement, customPackageTex, *args, **kwargs)    
+
+
