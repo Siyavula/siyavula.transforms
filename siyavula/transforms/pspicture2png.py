@@ -114,6 +114,7 @@ tikzTex = r'''
 
 \usepackage{tikz, ifthen}
 \usetikzlibrary{arrows,shapes,backgrounds,patterns,decorations.pathreplacing,decorations.pathmorphing,decorations.markings,shadows,shapes.misc,calc,positioning,intersections}
+\usepackage{pstricks-add}
 __PACKAGES__
 
 \usepackage{setspace}
