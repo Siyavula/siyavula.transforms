@@ -136,7 +136,7 @@ __PACKAGES__
 \end{document}
 '''
 
-customPackageTex = r'''
+latexpictureTex = r'''
 \documentclass[10pt]{report}
 \renewcommand{\familydefault}{\sfdefault}
 
@@ -327,11 +327,11 @@ def pspicture2png(iPspictureElement, *args, **kwargs):
     return pstikz2png(iPspictureElement, pstricksTex, *args, **kwargs)
 
 
-def custompackage2png(iCustomPackageElement, *args, **kwargs):
+def latexpicture2png(iLatexPictureElement, *args, **kwargs):
     """
     Inputs:
 
-      iCustomPackageElement - etree.Element
+      iLatexPictureElement - etree.Element
 
       iReturnEps - whether to also return the intermediate EPS file
 
@@ -355,6 +355,6 @@ def custompackage2png(iCustomPackageElement, *args, **kwargs):
 
     One or two paths, the first to the PNG, the second to the EPS.
     """
-    return pstikz2png(iCustomPackageElement, customPackageTex, *args, **kwargs)    
+    return pstikz2png(iLatexPictureElement, latexpictureTex, *args, **kwargs)    
 
 
