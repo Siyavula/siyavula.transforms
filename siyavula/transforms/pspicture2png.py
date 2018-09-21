@@ -172,7 +172,13 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     """
     iLatexPath = iLatexPath or os.environ.get('LATEX_PATH', '')
 
-    tempDir = tempfile.mkdtemp()
+    # tempDir = tempfile.mkdtemp()
+    import hashlib
+    digest = hashlib.md5(iPictureElement.find('code').text).hexdigest()
+    tempDir = os.path.join('/home/hein/temp/3959-42/monassis', digest)
+    if not os.path.exists(tempDir):
+        tempDir = os.makedirs(tempDir)
+
     baseFilename = '_oOFIGUREOo_'
     latexFilename = baseFilename + '.tex'
     dviFilename = baseFilename + '.dvi'
