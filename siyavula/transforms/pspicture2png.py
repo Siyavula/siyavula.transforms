@@ -172,7 +172,7 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     """
     iLatexPath = iLatexPath or os.environ.get('LATEX_PATH', '')
 
-    tempDir = tempfile.mkdtemp()
+    tempDir = tempfile.mkdtemp(dir=os.path.join(os.environ['TEMPLATE_CACHE_PATH'], 'temp'))
     baseFilename = '_oOFIGUREOo_'
     latexFilename = baseFilename + '.tex'
     dviFilename = baseFilename + '.dvi'
