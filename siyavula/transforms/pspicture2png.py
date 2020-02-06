@@ -209,16 +209,22 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
             fp.write(contents)
 
     for i in range(iPasses):
-        command = [os.path.join(iLatexPath, 'latex'), "-halt-on-error", latexFilename]
+        # This just demonstrates compiling the .tex file in the container to
+        # create the .dvi, .aux files, the other conversions like .png are still
+        # handled by your local latex installation
+        # NB! Replace the path below with the path to your Latex docker-compose.yaml file
+        command = ['docker-compose', '-f', '/home/lehan/projects/siyavula/siyavula.latex.docker/docker-compose.yaml',
+                   'run', 'latex', 'latex', '-halt-on-error', '-output-directory=' + tempDir, tempDir + '/' + latexFilename]
+
         try:
             errorLog, temp = execute(command, cwd=tempDir)
         except OSError, error:
             raise Exception("Got {} when calling execute({}, cwd={})".format(
-                            error, command, tempDir))
+                            error, '', tempDir))
         try:
             open(dviPath, "rb").close()
         except IOError:
-            raise LatexPictureError("LaTeX failed to compile the image on pass %i" % i, errorLog)
+            raise LatexPictureError("LaTeX failed to compile the image on pass %i" % i, '')
     execute([os.path.join(iLatexPath, "dvips"), dviFilename, "-o", psFilename], cwd=tempDir)
 
     if iReturnEps:
