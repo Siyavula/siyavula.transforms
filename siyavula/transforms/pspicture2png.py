@@ -1,3 +1,4 @@
+import docker
 import os
 import tempfile
 from lxml import etree
@@ -208,23 +209,22 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         with open(os.path.join(tempDir, path), 'wb') as fp:
             fp.write(contents)
 
-    for i in range(iPasses):
-        # This just demonstrates compiling the .tex file in the container to
-        # create the .dvi, .aux files, the other conversions like .png are still
-        # handled by your local latex installation
-        # NB! Replace the path below with the path to your Latex docker-compose.yaml file
-        command = ['docker-compose', '-f', '/home/lehan/projects/siyavula/siyavula.latex.docker/docker-compose.yaml',
-                   'run', 'latex', 'latex', '-halt-on-error', '-output-directory=' + tempDir, tempDir + '/' + latexFilename]
+    client = docker.from_env()
+    container = client.containers.get('siyavula.latex')
 
+    for i in range(iPasses):
+        # command = [os.path.join(iLatexPath, 'latex'), "-halt-on-error", latexFilename]
+        command = ['latex', '-halt-on-error', '-output-directory=' + tempDir, latexFilename]
         try:
-            errorLog, temp = execute(command, cwd=tempDir)
+            # errorLog, temp = execute(command, cwd=tempDir)
+            container.exec_run(command)
         except OSError, error:
             raise Exception("Got {} when calling execute({}, cwd={})".format(
-                            error, '', tempDir))
+                            error, command, tempDir))
         try:
             open(dviPath, "rb").close()
         except IOError:
-            raise LatexPictureError("LaTeX failed to compile the image on pass %i" % i, '')
+            raise LatexPictureError("LaTeX failed to compile the image on pass %i" % i, errorLog)
     execute([os.path.join(iLatexPath, "dvips"), dviFilename, "-o", psFilename], cwd=tempDir)
 
     if iReturnEps:
