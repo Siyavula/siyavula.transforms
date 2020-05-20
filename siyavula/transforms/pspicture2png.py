@@ -241,11 +241,11 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
             raise LatexPictureError("LaTeX failed to compile the image on pass %i" % i)
 
     #execute([os.path.join(iLatexPath, "dvips"), dviFilename, "-o", psFilename], cwd=tempDir)
-    container.exec_run(['dvips', dviFilename, '-o', psFilename])
+    container.exec_run(['dvips', dviPath, '-o', psPath])
 
     if iReturnEps:
         #execute([os.path.join(iLatexPath, "ps2eps"), psFilename], cwd=tempDir)
-        container.exec_run(['ps2eps', psFilename])
+        container.exec_run(['ps2eps', psPath])
 
     if (relativeWidth is not None) and (iPageWidthPx is not None):
         size = int(round(float(relativeWidth) * iPageWidthPx))
@@ -253,13 +253,13 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         #                  ['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
         #                  psFilename, pngFilename], cwd=tempDir)
         print(['convert', '-trim', '-geometry', '%ix' %
-               size, '-density', '%i' % (2 * size), psFilename, pngFilename])
+               size, '-density', '%i' % (2 * size), psPath, psPath])
         container.exec_run(['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
-                            psFilename, pngFilename])
+                            psPath, pngPath])
     else:
         #execute(['convert', '-trim', '-density', '%i' % iDpi, psFilename, pngFilename], cwd=tempDir)
-        print(['convert', '-trim', '-density', '%i' % iDpi, psFilename, pngFilename])
-        container.exec_run(['convert', '-trim', '-density', '%i' % iDpi, psFilename, pngFilename])
+        print(['convert', '-trim', '-density', '%i' % iDpi, psPath, pngPath])
+        container.exec_run(['convert', '-trim', '-density', '%i' % iDpi, psPath, pngPath])
 
     if iReturnEps:
         return pngPath, epsPath
