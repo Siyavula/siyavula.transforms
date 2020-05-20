@@ -186,6 +186,19 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     epsPath = os.path.join(tempDir, epsFilename)
     pngPath = os.path.join(tempDir, pngFilename)
 
+    print('tempDir', tempDir)
+    print('baseFilename', baseFilename)
+    print('latexFilename', latexFilename)
+    print('dviFilename', dviFilename)
+    print('psFilename', psFilename)
+    print('epsFilename', epsFilename)
+    print('pngFilename', pngFilename)
+    print('latexPath', latexPath)
+    print('dviPath', dviPath)
+    print('psPath', psPath)
+    print('epsPath', epsPath)
+    print('pngPath', pngPath)
+
     namespaces = {
         'style': 'http://siyavula.com/cnxml/style/0.1',
     }
@@ -221,10 +234,12 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         except OSError, error:
             raise Exception("Got {} when calling execute({}, cwd={})".format(
                             error, command, tempDir))
+
         try:
             open(dviPath, "rb").close()
         except IOError:
-            raise LatexPictureError("LaTeX failed to compile the image on pass %i" % i, errorLog)
+            raise LatexPictureError("LaTeX failed to compile the image on pass %i" % i)
+
     execute([os.path.join(iLatexPath, "dvips"), dviFilename, "-o", psFilename], cwd=tempDir)
 
     if iReturnEps:
