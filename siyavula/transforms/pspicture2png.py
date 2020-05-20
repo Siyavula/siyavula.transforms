@@ -250,12 +250,15 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     if (relativeWidth is not None) and (iPageWidthPx is not None):
         size = int(round(float(relativeWidth) * iPageWidthPx))
         # execute(
-        #    ['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
-        #        psFilename, pngFilename], cwd=tempDir)
-        container.exec_run(['convert', '-trim', '-geometry', '%ix' %
-                            size, '-density', '%i' % (2 * size), psFilename, pngFilename])
+        #                  ['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
+        #                  psFilename, pngFilename], cwd=tempDir)
+        print(['convert', '-trim', '-geometry', '%ix' %
+               size, '-density', '%i' % (2 * size), psFilename, pngFilename])
+        container.exec_run(['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
+                            psFilename, pngFilename])
     else:
         #execute(['convert', '-trim', '-density', '%i' % iDpi, psFilename, pngFilename], cwd=tempDir)
+        print(['convert', '-trim', '-density', '%i' % iDpi, psFilename, pngFilename])
         container.exec_run(['convert', '-trim', '-density', '%i' % iDpi, psFilename, pngFilename])
 
     if iReturnEps:
