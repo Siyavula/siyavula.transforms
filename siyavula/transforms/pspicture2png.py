@@ -138,7 +138,7 @@ __PACKAGES__
 
 
 def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150,
-               iIncludedFiles={}, iPasses=1, iLatexPath=''):
+               iIncludedFiles={}, iPasses=1):
     """
     Inputs:
 
@@ -164,14 +164,12 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
 
       iPasses - The number of times to run latex.
 
-      iLatexPath - Path to location of LaTeX executables. This should
-        contain latex.
-
     Outputs:
 
     One or two paths, the first to the PNG, the second to the EPS.
     """
-    iLatexPath = iLatexPath or os.environ.get('LATEX_PATH', '')
+    client = docker.from_env()
+    container = client.containers.get('latex')
 
     tempDir = tempfile.mkdtemp()
     baseFilename = '_oOFIGUREOo_'
@@ -185,19 +183,6 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
     psPath = os.path.join(tempDir, psFilename)
     epsPath = os.path.join(tempDir, epsFilename)
     pngPath = os.path.join(tempDir, pngFilename)
-
-    print('tempDir', tempDir)
-    print('baseFilename', baseFilename)
-    print('latexFilename', latexFilename)
-    print('dviFilename', dviFilename)
-    print('psFilename', psFilename)
-    print('epsFilename', epsFilename)
-    print('pngFilename', pngFilename)
-    print('latexPath', latexPath)
-    print('dviPath', dviPath)
-    print('psPath', psPath)
-    print('epsPath', epsPath)
-    print('pngPath', pngPath)
 
     namespaces = {
         'style': 'http://siyavula.com/cnxml/style/0.1',
@@ -222,14 +207,9 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         with open(os.path.join(tempDir, path), 'wb') as fp:
             fp.write(contents)
 
-    client = docker.from_env()
-    container = client.containers.get('latex')
-
     for i in range(iPasses):
-        # command = [os.path.join(iLatexPath, 'latex'), "-halt-on-error", latexFilename]
         command = ['latex', '-halt-on-error', '-output-directory=' + tempDir, latexFilename]
         try:
-            # errorLog, temp = execute(command, cwd=tempDir)
             container.exec_run(command)
         except OSError, error:
             raise Exception("Got {} when calling execute({}, cwd={})".format(
@@ -240,25 +220,16 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         except IOError:
             raise LatexPictureError("LaTeX failed to compile the image on pass %i" % i)
 
-    #execute([os.path.join(iLatexPath, "dvips"), dviFilename, "-o", psFilename], cwd=tempDir)
     container.exec_run(['dvips', dviPath, '-o', psPath])
 
     if iReturnEps:
-        #execute([os.path.join(iLatexPath, "ps2eps"), psFilename], cwd=tempDir)
         container.exec_run(['ps2eps', psPath])
 
     if (relativeWidth is not None) and (iPageWidthPx is not None):
         size = int(round(float(relativeWidth) * iPageWidthPx))
-        # execute(
-        #                  ['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
-        #                  psFilename, pngFilename], cwd=tempDir)
-        print(['convert', '-trim', '-geometry', '%ix' %
-               size, '-density', '%i' % (2 * size), psPath, psPath])
         container.exec_run(['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
                             psPath, pngPath])
     else:
-        #execute(['convert', '-trim', '-density', '%i' % iDpi, psFilename, pngFilename], cwd=tempDir)
-        print(['convert', '-trim', '-density', '%i' % iDpi, psPath, pngPath])
         container.exec_run(['convert', '-trim', '-density', '%i' % iDpi, psPath, pngPath])
 
     if iReturnEps:
@@ -288,9 +259,6 @@ def tikzpicture2png(iTikzpictureElement, *args, **kwargs):
 
       iPasses - The number of times to run latex.
 
-      iLatexPath - Path to location of LaTeX executables. This should
-        contain latex.
-
     Outputs:
 
     One or two paths, the first to the PNG, the second to the EPS.
@@ -318,9 +286,6 @@ def pspicture2png(iPspictureElement, *args, **kwargs):
         contain sub-directories.
 
       iPasses - The number of times to run latex.
-
-      iLatexPath - Path to location of LaTeX executables. This should
-        contain latex.
 
     Outputs:
 
