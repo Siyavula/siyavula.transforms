@@ -210,7 +210,7 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
             fp.write(contents)
 
     client = docker.from_env()
-    container = client.containers.get('siyavula.latex')
+    container = client.containers.get('latex')
 
     for i in range(iPasses):
         # command = [os.path.join(iLatexPath, 'latex'), "-halt-on-error", latexFilename]
