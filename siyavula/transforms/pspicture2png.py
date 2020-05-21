@@ -235,6 +235,7 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         print(False)
         exit_code, output = container.exec_run(
             ['convert', '-trim', '-density', '%i' % iDpi, psPath, pngPath])
+        print(['convert', '-trim', '-density', '%i' % iDpi, psPath, pngPath])
         print(exit_code, output)
 
     if iReturnEps:
