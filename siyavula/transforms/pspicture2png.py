@@ -226,17 +226,11 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
         container.exec_run(['ps2eps', psPath])
 
     if (relativeWidth is not None) and (iPageWidthPx is not None):
-        print(True)
         size = int(round(float(relativeWidth) * iPageWidthPx))
-        exit_code, output = container.exec_run(['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
-                                                psPath, pngPath])
-        print(exit_code, output)
+        container.exec_run(['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
+                            psPath, pngPath])
     else:
-        print(False)
-        exit_code, output = container.exec_run(
-            ['convert', '-trim', '-density', '%i' % iDpi, psPath, pngPath])
-        print(['convert', '-trim', '-density', '%i' % iDpi, psPath, pngPath])
-        print(exit_code, output)
+        container.exec_run(['convert', '-trim', '-density', '%i' % iDpi, psPath, pngPath])
 
     if iReturnEps:
         return pngPath, epsPath
