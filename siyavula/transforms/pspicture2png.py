@@ -1,3 +1,4 @@
+import docker
 import os
 import tempfile
 from lxml import etree
@@ -137,7 +138,7 @@ __PACKAGES__
 
 
 def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDpi=150,
-               iIncludedFiles={}, iPasses=1, iLatexPath=''):
+               iIncludedFiles={}, iPasses=1):
     """
     Inputs:
 
@@ -163,14 +164,12 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
 
       iPasses - The number of times to run latex.
 
-      iLatexPath - Path to location of LaTeX executables. This should
-        contain latex.
-
     Outputs:
 
     One or two paths, the first to the PNG, the second to the EPS.
     """
-    iLatexPath = iLatexPath or os.environ.get('LATEX_PATH', '')
+    client = docker.from_env()
+    container = client.containers.get('latex')
 
     tempDir = tempfile.mkdtemp()
     baseFilename = '_oOFIGUREOo_'
@@ -209,28 +208,29 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
             fp.write(contents)
 
     for i in range(iPasses):
-        command = [os.path.join(iLatexPath, 'latex'), "-halt-on-error", latexFilename]
+        command = ['latex', '-halt-on-error', '-output-directory=' + tempDir, latexFilename]
         try:
-            errorLog, temp = execute(command, cwd=tempDir)
+            container.exec_run(command)
         except OSError, error:
             raise Exception("Got {} when calling execute({}, cwd={})".format(
                             error, command, tempDir))
+
         try:
             open(dviPath, "rb").close()
         except IOError:
-            raise LatexPictureError("LaTeX failed to compile the image on pass %i" % i, errorLog)
-    execute([os.path.join(iLatexPath, "dvips"), dviFilename, "-o", psFilename], cwd=tempDir)
+            raise LatexPictureError("LaTeX failed to compile the image on pass %i" % i)
+
+    container.exec_run(['dvips', dviPath, '-o', psPath])
 
     if iReturnEps:
-        execute([os.path.join(iLatexPath, "ps2eps"), psFilename], cwd=tempDir)
+        container.exec_run(['ps2eps', psPath])
 
     if (relativeWidth is not None) and (iPageWidthPx is not None):
         size = int(round(float(relativeWidth) * iPageWidthPx))
-        execute(
-            ['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
-                psFilename, pngFilename], cwd=tempDir)
+        container.exec_run(['convert', '-trim', '-geometry', '%ix' % size, '-density', '%i' % (2 * size),
+                            psPath, pngPath])
     else:
-        execute(['convert', '-trim', '-density', '%i' % iDpi, psFilename, pngFilename], cwd=tempDir)
+        container.exec_run(['convert', '-trim', '-density', '%i' % iDpi, psPath, pngPath])
 
     if iReturnEps:
         return pngPath, epsPath
@@ -259,9 +259,6 @@ def tikzpicture2png(iTikzpictureElement, *args, **kwargs):
 
       iPasses - The number of times to run latex.
 
-      iLatexPath - Path to location of LaTeX executables. This should
-        contain latex.
-
     Outputs:
 
     One or two paths, the first to the PNG, the second to the EPS.
@@ -289,9 +286,6 @@ def pspicture2png(iPspictureElement, *args, **kwargs):
         contain sub-directories.
 
       iPasses - The number of times to run latex.
-
-      iLatexPath - Path to location of LaTeX executables. This should
-        contain latex.
 
     Outputs:
 
