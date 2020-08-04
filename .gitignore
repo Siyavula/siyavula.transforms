@@ -3,3 +3,9 @@
 siyavula.transforms.egg-info/
 build/
 dist/
+
+# IDE files
+nbproject
+.idea
+.netbeans.xml
+.vscode
