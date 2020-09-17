@@ -209,11 +209,9 @@ def pstikz2png(iPictureElement, iLatex, iReturnEps=False, iPageWidthPx=None, iDp
 
     for i in range(iPasses):
         command = ['latex', '-halt-on-error', '-output-directory=' + tempDir, latexFilename]
-        try:
-            container.exec_run(command, workdir=tempDir)
-        except OSError, error:
-            raise Exception("Got {} when calling execute({}, cwd={})".format(
-                            error, command, tempDir))
+        exit_code, output = container.exec_run(command, workdir=tempDir)
+        if exit_code != 0:
+            raise Exception(output)
 
         try:
             open(dviPath, "rb").close()
